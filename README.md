@@ -6,11 +6,15 @@ A local, read-only browser for BigCommerce product catalogs. Connect one or more
 
 ## Features
 
-- Manage multiple BigCommerce environments and drag to set their display order.
-- Browse channel-specific category trees and product listings.
+- Manage multiple BigCommerce environments: add, edit, remove (with confirmation), and drag to reorder with directional drop indicators.
+- Browse channel-specific category trees, with collapsible category nodes and clickable breadcrumbs for the selected path.
 - Switch between grid and list views, adjust grid density, and load additional products as you scroll.
-- View product descriptions, pricing, variants, images, custom fields, categories, related products, and unstructured API data.
-- Open a product in the BigCommerce control panel or refresh its details from the API.
+- Navigate the catalog and product images entirely from the keyboard — see [Keyboard Shortcuts](#keyboard-shortcuts).
+- Hover a product card to scrub through its images; click a detail-panel image to open a zoom viewer with click-to-zoom, pan, and prev/next controls.
+- View product descriptions (rendered HTML), pricing (sale vs. list price), variants, images, custom fields, categories, related products, and collapsible raw API data per field.
+- Open a product in the BigCommerce control panel or refresh its details from the API, with a loading indicator while it refetches.
+- Resize the sidebar and detail panel by dragging their handles.
+- See distinct empty, error, and loading states, plus a connection status indicator for the active environment.
 - Persist the selected environment, channel, category, layout, and panel sizes locally.
 - Encrypt stored access tokens with AES-256-GCM.
 
@@ -71,13 +75,38 @@ For new installations, use the Settings interface instead of the legacy variable
 
 ### Environments
 
-Open **Settings** to add, edit, remove, or reorder environments. An environment contains a display name, store hash, and access token. Updating an environment without entering a token preserves its current token.
+Open **Settings** to add, edit, remove, or reorder environments. An environment contains a display name, store hash, and access token; the store hash must be unique across environments. Updating an environment without entering a token preserves its current encrypted token. Removing an environment asks for confirmation first. Drag a row to reorder it — a drop indicator shows whether it will land before or after the row underneath the pointer; reordering applies immediately and rolls back if saving the new order fails. Press Escape to close the Settings panel.
 
 ### Catalog navigation
 
-Select an environment from the sidebar, then choose a channel and category. The browser fetches products from the corresponding BigCommerce catalog. Product pages are retrieved in batches and more products load automatically near the bottom of the page.
+Select an environment from the sidebar, then choose a channel and category from the collapsible category tree. The breadcrumb in the topbar reflects the selected category path and each segment is clickable. The browser fetches products from the corresponding BigCommerce catalog. Product pages are retrieved in batches and more products load automatically near the bottom of the page. Switching environments reloads that environment's own saved channel and category.
 
-Click a product to open its detail panel. Its images can be opened in a zoom viewer; use the left and right arrow keys to change images and Escape to close the viewer or panel.
+Click a product to open its detail panel, or use the keyboard shortcuts below. Hovering a product card scrubs through its images based on cursor position. Click a detail-panel image to open the zoom viewer, which supports click-to-zoom, panning, and prev/next/close buttons in addition to keyboard controls.
+
+Drag the handles between the sidebar, catalog, and detail panel to resize them.
+
+## Keyboard Shortcuts
+
+Global shortcuts are ignored while a modifier key (Cmd/Ctrl/Alt) is held, while focus is on an input, button, or link, or while the Settings panel is open.
+
+| Keys | Action | Context |
+| --- | --- | --- |
+| `g` | Switch to grid layout | Global |
+| `l` | Switch to list layout | Global |
+| `+` / `=` | Increase grid density (up to 6 columns) | Global, grid layout |
+| `-` | Decrease grid density (down to 2 columns) | Global, grid layout |
+| Arrow keys | Move focus between product cards (grid-aware) and scroll into view | Global, catalog has products |
+| `Enter` | Open the focused product's detail panel | Global |
+| `Escape` | Clear keyboard-navigation focus | When a product is keyboard-focused |
+| `Escape` | Close the product detail panel | Detail panel open |
+| `Escape` | Close the Settings panel | Settings open |
+| `←` / `→` | Cycle the detail-panel thumbnail image | Detail panel open, zoom viewer closed |
+| `Enter` | Open the zoom viewer for the current thumbnail | Detail panel open, zoom viewer closed |
+| `←` / `→` | Change image | Zoom viewer open |
+| `+` / `=` | Zoom in (up to 4x) | Zoom viewer open |
+| `-` | Zoom out (down to 1x) | Zoom viewer open |
+| `0` | Reset zoom to 1x | Zoom viewer open |
+| `Escape` | Close the zoom viewer | Zoom viewer open |
 
 ### Stored preferences
 
