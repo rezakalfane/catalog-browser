@@ -1,4 +1,4 @@
-# BigCommerce Catalog
+# BigCommerce Catalog Browser
 
 A local, read-only browser for BigCommerce product catalogs. Connect one or more stores, switch between their channels and categories, and inspect product data without navigating the BigCommerce control panel.
 
