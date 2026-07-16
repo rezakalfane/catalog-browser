@@ -2,6 +2,8 @@
 
 A local, read-only browser for BigCommerce product catalogs. Connect one or more stores, switch between their channels and categories, and inspect product data without navigating the BigCommerce control panel.
 
+![Catalog Browser](./docs/images/catalog-browser-00.png)
+
 ## Features
 
 - Manage multiple BigCommerce environments and drag to set their display order.
