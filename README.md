@@ -132,6 +132,45 @@ The database stores environment names, store hashes, encrypted access tokens, or
 
 Back up both `data/catalog.db` and the encryption key together. Restoring only the database without the original key will not restore access to encrypted credentials.
 
+### Database schema
+
+```mermaid
+erDiagram
+    ENVIRONMENTS {
+        int id PK
+        text name
+        text store_hash UK
+        text encrypted_access_token
+        int sort_order
+        text created_at
+        text updated_at
+    }
+    ENVIRONMENT_PREFERENCES {
+        int environment_id PK "FK to environments.id, ON DELETE CASCADE"
+        int channel_id
+        int category_id
+    }
+    APP_PREFERENCES {
+        int id PK "always 1, single row"
+        int environment_id "no FK constraint; cleared by app code on delete"
+        int channel_id "legacy column, unused"
+        int category_id "legacy column, unused"
+        text layout
+        int density
+        int sidebar_width
+        int drawer_width
+    }
+
+    ENVIRONMENTS ||--o| ENVIRONMENT_PREFERENCES : "has saved channel/category"
+    ENVIRONMENTS |o--o| APP_PREFERENCES : "referenced as active environment"
+```
+
+![Database schema](./docs/images/db-schema.png)
+
+- `environments` holds one row per configured BigCommerce store; `store_hash` is unique and `encrypted_access_token` is AES-256-GCM ciphertext.
+- `environment_preferences` stores the last-selected channel and category per environment, keyed by `environment_id` and removed automatically when the environment is deleted (`ON DELETE CASCADE`).
+- `app_preferences` is a single-row table (`id` is constrained to `1`) holding application-wide UI state — the active environment and layout/density/panel-width settings. Its `environment_id` column is not an enforced foreign key; `src/lib/environments.ts` clears it manually when the referenced environment is deleted. Its `channel_id`/`category_id` columns predate `environment_preferences` and are no longer written to.
+
 ## Architecture
 
 ```text
