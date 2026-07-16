@@ -165,8 +165,6 @@ erDiagram
     ENVIRONMENTS |o--o| APP_PREFERENCES : "referenced as active environment"
 ```
 
-![Database schema](./docs/images/db-schema.png)
-
 - `environments` holds one row per configured BigCommerce store; `store_hash` is unique and `encrypted_access_token` is AES-256-GCM ciphertext.
 - `environment_preferences` stores the last-selected channel and category per environment, keyed by `environment_id` and removed automatically when the environment is deleted (`ON DELETE CASCADE`).
 - `app_preferences` is a single-row table (`id` is constrained to `1`) holding application-wide UI state — the active environment and layout/density/panel-width settings. Its `environment_id` column is not an enforced foreign key; `src/lib/environments.ts` clears it manually when the referenced environment is deleted. Its `channel_id`/`category_id` columns predate `environment_preferences` and are no longer written to.
