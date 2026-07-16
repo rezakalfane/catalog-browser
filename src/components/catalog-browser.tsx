@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Category, Channel, Pagination, Product } from "@/lib/bigcommerce";
 import type { AppPreferences, EnvironmentSummary } from "@/lib/environments";
 import EnvironmentSettings from "@/components/environment-settings";
@@ -167,6 +168,15 @@ function Tree({ categories, selected, onSelect }: { categories: Category[]; sele
 }
 
 export default function CatalogBrowser() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialUrlStateRef = useRef({
+    environmentId: searchParams.get("environmentId"),
+    channelId: searchParams.get("channelId"),
+    categoryId: searchParams.get("categoryId"),
+    productId: searchParams.get("productId"),
+  });
   const [catalog, setCatalog] = useState<Catalog>({ configured: false, categories: [], products: [] });
   const [category, setCategory] = useState<number | null>(null);
   const [activeEnvironmentId, setActiveEnvironmentId] = useState<number | null>(null);
@@ -204,9 +214,13 @@ export default function CatalogBrowser() {
     fetch("/api/preferences", { signal: controller.signal })
       .then((response) => response.json())
       .then((data: { preferences: AppPreferences }) => {
-        setRequestedEnvironmentId(data.preferences.environmentId);
-        setRequestedChannelId(data.preferences.channelId);
-        setCategory(data.preferences.categoryId);
+        const initialUrlState = initialUrlStateRef.current;
+        const environmentId = initialUrlState.environmentId ? Number(initialUrlState.environmentId) : data.preferences.environmentId;
+        const channelId = initialUrlState.channelId ? Number(initialUrlState.channelId) : data.preferences.channelId;
+        const categoryId = initialUrlState.categoryId ? Number(initialUrlState.categoryId) : data.preferences.categoryId;
+        setRequestedEnvironmentId(environmentId);
+        setRequestedChannelId(channelId);
+        setCategory(categoryId);
         setLayout(data.preferences.layout);
         setColumns(data.preferences.density);
         setSidebarWidth(data.preferences.sidebarWidth);
@@ -343,6 +357,30 @@ export default function CatalogBrowser() {
       .catch(() => {});
     return () => controller.abort();
   }, [activeChannelId, activeEnvironmentId, selectedProductId, selectedRelatedProductIds]);
+
+  useEffect(() => {
+    const bookmarkedProductId = initialUrlStateRef.current.productId;
+    if (!bookmarkedProductId || !activeEnvironmentId) return;
+    initialUrlStateRef.current.productId = null;
+    const controller = new AbortController();
+    const params = new URLSearchParams({ productId: bookmarkedProductId, environmentId: String(activeEnvironmentId) });
+    if (activeChannelId) params.set("channelId", String(activeChannelId));
+    fetch(`/api/catalog?${params}`, { signal: controller.signal })
+      .then(async (response) => { const data = await response.json() as { product?: Product }; if (response.ok && data.product) { setRelatedProducts([]); setSelected(data.product); } })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [activeChannelId, activeEnvironmentId]);
+
+  useEffect(() => {
+    if (!preferencesLoaded) return;
+    const params = new URLSearchParams();
+    if (requestedEnvironmentId) params.set("environmentId", String(requestedEnvironmentId));
+    if (requestedChannelId) params.set("channelId", String(requestedChannelId));
+    if (category) params.set("categoryId", String(category));
+    if (selectedProductId) params.set("productId", String(selectedProductId));
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [category, pathname, preferencesLoaded, requestedChannelId, requestedEnvironmentId, router, selectedProductId]);
 
   const categoryName = catalog.categories.find((item) => item.id === category)?.name || "All products";
   const breadcrumbs: Category[] = [];
