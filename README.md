@@ -16,6 +16,7 @@ A local, read-only browser for BigCommerce product catalogs. Connect one or more
 - Resize the sidebar and detail panel by dragging their handles.
 - See distinct empty, error, and loading states, plus a connection status indicator for the active environment.
 - Persist the selected environment, channel, category, layout, and panel sizes locally.
+- Reflect the selected environment, channel, category, and open product in the URL so a specific view can be bookmarked or shared.
 - Encrypt stored access tokens with AES-256-GCM.
 
 ## Requirements
@@ -84,6 +85,8 @@ Select an environment from the sidebar, then choose a channel and category from 
 Click a product to open its detail panel, or use the keyboard shortcuts below. Hovering a product card scrubs through its images based on cursor position. Click a detail-panel image to open the zoom viewer, which supports click-to-zoom, panning, and prev/next/close buttons in addition to keyboard controls.
 
 Drag the handles between the sidebar, catalog, and detail panel to resize them.
+
+The URL updates as you navigate to include the selected environment, channel, category, and open product (for example, `?environmentId=1&channelId=2&categoryId=3&productId=4`). Bookmark or share a URL to return directly to that view; opening a URL with these parameters overrides the locally saved preferences for that load.
 
 ## Keyboard Shortcuts
 
